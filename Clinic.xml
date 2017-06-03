@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<objectModel xsi:schemaLocation="http://standards.ieee.org/IEEE1516-2010 http://standards.ieee.org/downloads/1516/1516.2-2010/IEEE1516-DIF-2010.xsd" xmlns="http://standards.ieee.org/IEEE1516-2010" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelIdentification notes="Note1">
+        <name>Clinic processes for Clinic FOM</name>
+        <type>FOM</type>
+        <version>3.0</version>
+        <modificationDate>2017-06-02</modificationDate>
+        <securityClassification>Unclassified</securityClassification>
+        <releaseRestriction>Other organizations not related to Federated Clinic</releaseRestriction>
+        <purpose>To define a processes module for a Clinic federation</purpose>
+        <applicationDomain>Clinic operations</applicationDomain>
+        <description>Processes for the modular Clinic.</description>
+        <useLimitation>Derived models must reference this document</useLimitation>
+    </modelIdentification>
+    <objects>
+        <objectClass>
+            <name>HLAobjectRoot</name>
+            <objectClass>
+                <name>WaitingRoom</name>
+                <sharing>PublishSubscribe</sharing>
+                <semantics>Waiting room</semantics>
+                <attribute notes="Note4">
+                    <name>NumberOfSeats</name>
+                    <dataType>HLAinteger32BE</dataType>
+                    <updateType>Conditional</updateType>
+                    <updateCondition>Work flow</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <dimensions/>
+                    <transportation>HLAreliable</transportation>
+                    <order>TimeStamp</order>
+                    <semantics>Amount seats in waitning room</semantics>
+                </attribute>
+                <attribute notes="Note5">
+                    <name>NumberOfPeopleInside</name>
+                    <dataType>HLAinteger32BE</dataType>
+                    <updateType>Conditional</updateType>
+                    <updateCondition>Work flow</updateCondition>
+                    <ownership>DivestAcquire</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <dimensions/>
+                    <transportation>HLAreliable</transportation>
+                    <order>TimeStamp</order>
+                    <semantics>Amount of people in waitning room</semantics>
+                </attribute>
+            </objectClass>
+        </objectClass>
+    </objects>
+    <interactions>
+        <interactionClass>
+            <name>HLAinteractionRoot</name>
+             <interactionClass>
+				<name>ClinicOpened</name>
+				<sharing>PublishSubscribe</sharing>
+				<transportation>HLAreliable</transportation>
+				<order>TimeStamp</order>
+				<semantics>Clinic has opened</semantics>
+				<parameter>
+					<name>OpenTime</name>
+					<dataType>HLAfloat64Time</dataType>
+					<semantics>Time when clinc has opened or will open</semantics>
+				</parameter>
+				<parameter>
+					<name>CloseTime</name>
+					<dataType>HLAfloat64Time</dataType>
+					<semantics>Time when clinc will close</semantics>
+				</parameter>
+			</interactionClass>
+            <interactionClass>
+                <name>PatientEnteredClinic</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>TimeStamp</order>
+                <semantics>Patient has entered clinic</semantics>
+                <parameter>
+                    <name>PatientId</name>
+                    <dataType>HLAinteger32BE</dataType>
+                    <semantics>Patient's identifier</semantics>
+                </parameter>
+            </interactionClass>
+        </interactionClass>
+    </interactions>
+    <dimensions />
+    <time>
+        <timeStamp>
+            <dataType>TimeType</dataType>
+            <semantics>Floating point value expressed in minutes</semantics>
+        </timeStamp>
+        <lookahead>
+            <dataType>LAType</dataType>
+            <semantics>Floating point value expressed in minutes (non-negative)</semantics>
+        </lookahead>
+    </time>
+    <tags>
+        <updateReflectTag>
+            <dataType>NA</dataType>
+            <semantics>NA</semantics>
+        </updateReflectTag>
+        <sendReceiveTag>
+            <dataType>NA</dataType>
+            <semantics>NA</semantics>
+        </sendReceiveTag>
+        <deleteRemoveTag notes="Note3">
+            <dataType>HLAASCIIstring</dataType>
+            <semantics>Reason for deletion</semantics>
+        </deleteRemoveTag>
+        <divestitureRequestTag>
+            <dataType>NA</dataType>
+            <semantics>NA</semantics>
+        </divestitureRequestTag>
+        <divestitureCompletionTag>
+            <dataType>NA</dataType>
+            <semantics>NA</semantics>
+        </divestitureCompletionTag>
+        <acquisitionRequestTag>
+            <dataType>NA</dataType>
+            <semantics>NA</semantics>
+        </acquisitionRequestTag>
+        <requestUpdateTag>
+            <dataType>NA</dataType>
+            <semantics>NA</semantics>
+        </requestUpdateTag>
+    </tags>
+    <synchronizations>
+        <synchronizationPoint>
+            <label>InitialPublish</label>
+            <dataType>NA</dataType>
+            <capability>NA</capability>
+            <semantics>Achieved when all classes are published and subscribed, and all initially present objects are registered</semantics>
+        </synchronizationPoint>
+        <synchronizationPoint>
+            <label>InitialUpdate</label>
+            <dataType>NA</dataType>
+            <capability>NA</capability>
+            <semantics>Achieved when instance attribute values for all initially present objects are updated</semantics>
+        </synchronizationPoint>
+        <synchronizationPoint>
+            <label>BeginTimeAdvance</label>
+            <dataType>NA</dataType>
+            <capability>NA</capability>
+            <semantics>Achieved when time management services are invoked</semantics>
+        </synchronizationPoint>
+        <synchronizationPoint>
+            <label>PauseExecution</label>
+            <dataType>TimeType</dataType>
+            <capability>NA</capability>
+            <semantics>Achieved when the time advance after the time in the user-supplied tag is attained; time advance requests should then cease</semantics>
+        </synchronizationPoint>
+    </synchronizations>
+    <transportations>
+        <transportation>
+            <name>LowLatency</name>
+            <reliable>No</reliable>
+            <semantics>Choose the delivery mechanism that results in the lowest latency from service initiation to callback invocation at the receiving federate</semantics>
+        </transportation>
+    </transportations>
+    <switches>
+        <autoProvide isEnabled="true"/>
+        <conveyRegionDesignatorSets isEnabled="false"/>
+        <conveyProducingFederate isEnabled="false"/>
+        <attributeScopeAdvisory isEnabled="false"/>
+        <attributeRelevanceAdvisory isEnabled="false"/>
+        <objectClassRelevanceAdvisory isEnabled="true"/>
+        <interactionRelevanceAdvisory isEnabled="true"/>
+        <serviceReporting isEnabled="false"/>
+        <exceptionReporting isEnabled="false"/>
+        <delaySubscriptionEvaluation isEnabled="false"/>
+        <automaticResignAction resignAction="CancelThenDeleteThenDivest"/>
+    </switches>
+    <updateRates>
+        <updateRate>
+            <name>Low</name>
+            <rate>10.56</rate>
+            <semantics></semantics>
+        </updateRate>
+        <updateRate>
+            <name>Hi</name>
+            <rate>60.0</rate>
+            <semantics></semantics>
+        </updateRate>
+    </updateRates>
+    <dataTypes>
+        <basicDataRepresentations>
+            <basicData>
+                <name>UnsignedShort</name>
+                <size>16</size>
+                <interpretation>Integer in the range [0, 2^16 - 1]</interpretation>
+                <endian>Big</endian>
+                <encoding>16-bit unsigned integer.</encoding>
+            </basicData>
+        </basicDataRepresentations>
+        <simpleDataTypes>
+            <simpleData>
+                <name>TimeType</name>
+                <representation>HLAfloat32BE</representation>
+                <units>Minutes</units>
+                <resolution>0.01667</resolution>
+                <accuracy>NA</accuracy>
+                <semantics>Time representation</semantics>
+            </simpleData>
+            <simpleData>
+                <name>LAType</name>
+                <representation>HLAfloat32BE</representation>
+                <units>Minutes</units>
+                <resolution>0.01667</resolution>
+                <accuracy>NA</accuracy>
+                <semantics>Time interval (non-negative)</semantics>
+            </simpleData>
+        </simpleDataTypes>
+        <enumeratedDataTypes>
+            <enumeratedData>
+                <name>WaiterTasks</name>
+                <representation>HLAinteger32BE</representation>
+                <semantics>Possible activities of waiters</semantics>
+                <enumerator>
+                    <name>TakingOrder</name>
+                    <value>1</value>
+                </enumerator>
+                <enumerator>
+                    <name>Serving</name>
+                    <value>2</value>
+                </enumerator>
+                <enumerator>
+                    <name>Cleaning</name>
+                    <value>3</value>
+                </enumerator>
+                <enumerator>
+                    <name>CalculatingBill</name>
+                    <value>4</value>
+                </enumerator>
+                <enumerator>
+                    <name>Other</name>
+                    <value>5</value>
+                </enumerator>
+            </enumeratedData>
+            <enumeratedData>
+                <name>ExperienceLevel</name>
+                <representation>HLAinteger32BE</representation>
+                <semantics>Level of experience of waiters</semantics>
+                <enumerator>
+                    <name>Trainee</name>
+                    <value>0</value>
+                </enumerator>
+                <enumerator>
+                    <name>Apprentice</name>
+                    <value>1</value>
+                </enumerator>
+                <enumerator>
+                    <name>Journeyman</name>
+                    <value>2</value>
+                </enumerator>
+                <enumerator>
+                    <name>Senior</name>
+                    <value>3</value>
+                </enumerator>
+                <enumerator>
+                    <name>Temporary</name>
+                    <value>4</value>
+                </enumerator>
+                <enumerator>
+                    <name>Master</name>
+                    <value>5</value>
+                </enumerator>
+            </enumeratedData>
+            <enumeratedData>
+                <name>FlavorType</name>
+                <representation>HLAinteger32BE</representation>
+                <semantics>Possible flavors of soda</semantics>
+                <enumerator>
+                    <name>Cola</name>
+                    <value>101</value>
+                </enumerator>
+                <enumerator>
+                    <name>Orange</name>
+                    <value>102</value>
+                </enumerator>
+                <enumerator>
+                    <name>RootBeer</name>
+                    <value>103</value>
+                </enumerator>
+                <enumerator>
+                    <name>Cream</name>
+                    <value>104</value>
+                </enumerator>
+            </enumeratedData>
+        </enumeratedDataTypes>
+        <arrayDataTypes>
+            <arrayData>
+                <name>Employees</name>
+                <dataType>EmplId</dataType>
+                <cardinality>10</cardinality>
+                <encoding>HLAfixedArray</encoding>
+                <semantics>Identifiers of employees currently working</semantics>
+            </arrayData>
+            <arrayData>
+                <name>AddressBook</name>
+                <dataType>AddressType</dataType>
+                <cardinality>Dynamic</cardinality>
+                <encoding>An HLAinteger32BE followed by a set of index-value tuples. Each tuple consists of an HLAinteger32BE indicating the array index, followed by the element for that index. The initial HLAinteger32BE indicates the number of index-value pairs to follow, since all array elements need not be included.</encoding>
+                <semantics>Collection of all employee addresses</semantics>
+            </arrayData>
+        </arrayDataTypes>
+        <fixedRecordDataTypes>
+            <fixedRecordData>
+                <name>ServiceStat</name>
+                <encoding>HLAfixedRecord</encoding>
+                <semantics>Check-off on whether the server performed properly on elements of the meal</semantics>
+                <field>
+                    <name>EntreeOk</name>
+                    <dataType>HLAboolean</dataType>
+                    <semantics>Entree status</semantics>
+                </field>
+                <field>
+                    <name>Veggy1Ok</name>
+                    <dataType>HLAboolean</dataType>
+                    <semantics>Vegetable 1 status</semantics>
+                </field>
+                <field>
+                    <name>Veggy2Ok</name>
+                    <dataType>HLAboolean</dataType>
+                    <semantics>Vegetable 2 status</semantics>
+                </field>
+            </fixedRecordData>
+            <fixedRecordData>
+                <name>AddressType</name>
+                <encoding>HLAfixedRecord</encoding>
+                <semantics>Mailing address</semantics>
+                <field>
+                    <name>Name</name>
+                    <dataType>HLAASCIIstring</dataType>
+                    <semantics>Employee name</semantics>
+                </field>
+                <field>
+                    <name>Street</name>
+                    <dataType>HLAASCIIstring</dataType>
+                    <semantics>Street address</semantics>
+                </field>
+                <field>
+                    <name>City</name>
+                    <dataType>HLAASCIIstring</dataType>
+                    <semantics>City name</semantics>
+                </field>
+                <field>
+                    <name>State</name>
+                    <dataType>HLAASCIIstring</dataType>
+                    <semantics>State abbreviation</semantics>
+                </field>
+                <field>
+                    <name>Zip</name>
+                    <dataType>HLAASCIIstring</dataType>
+                    <semantics>Postal code</semantics>
+                </field>
+            </fixedRecordData>
+        </fixedRecordDataTypes>
+        <variantRecordDataTypes>
+            <variantRecordData>
+                <name>WaiterValue</name>
+                <discriminant>ValIndex</discriminant>
+                <dataType>ExperienceLevel</dataType>
+                <alternative>
+                    <enumerator>Trainee</enumerator>
+                    <name>CoursePassed</name>
+                    <dataType>HLAboolean</dataType>
+                    <semantics>Ratings scale for employees under training</semantics>
+                </alternative>
+                <alternative>
+                    <enumerator>[Apprentice .. Senior], Master</enumerator>
+                    <name>Rating</name>
+                    <dataType>RateScale</dataType>
+                    <semantics>Ratings scale for permanent employees</semantics>
+                </alternative>
+                <alternative>
+                    <enumerator>HLAother</enumerator>
+                    <name>Other</name>
+                    <dataType>HLAtoken</dataType>
+                    <semantics>All others</semantics>
+                </alternative>
+                <encoding>HLAvariantRecord</encoding>
+                <semantics>Datatype for waiter performance rating value</semantics>
+            </variantRecordData>
+        </variantRecordDataTypes>
+    </dataTypes>
+    <notes>
+        <note>
+            <label>Note1</label>
+            <semantics>Example of a note attached to the entire object model</semantics>
+        </note>
+        <note>
+            <label>Note2</label>
+            <semantics>Example of a note attached to an entire table</semantics>
+        </note>
+        <note>
+            <label>Note3</label>
+            <semantics>Example of a note attached to a table cell</semantics>
+        </note>
+        <note>
+            <label>Note4</label>
+            <semantics>Merit raises are not provided according to any regular time interval; they are provided on a supervisor's recommendation based on evidence of exceptional effort and performance</semantics>
+        </note>
+        <note>
+            <label>Note5</label>
+            <semantics>Years of service are a factor in any merit raise. This value is only changed on the anniversary of the employee's hire.</semantics>
+        </note>
+    </notes>
+</objectModel>
