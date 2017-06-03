@@ -48,7 +48,7 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
 
     private void log( String message )
     {
-        System.out.println( "FederateAmbassador: " + message );
+        System.out.println( "WaitingRoomFederateAmbassador: " + message );
     }
 
     @Override
@@ -118,7 +118,7 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
             try{
                 int id = decodeInt(theParameters, patientIdHandle);
                 registeredPatients.add(id);
-                log("Time:" + time +" Received pacient entered clinic " + id );
+                log("Time:" + time +" Received patient finished registering " + id );
             }
             catch (DecoderException e){
                 e.printStackTrace();
