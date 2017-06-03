@@ -9,6 +9,7 @@ import hla.rti1516e.time.HLAfloat64Time;
 import org.portico.impl.hla1516e.types.time.DoubleTime;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jakub on 03.06.2017.
@@ -37,6 +38,7 @@ public class ClinicAmbassador extends NullFederateAmbassador {
 
     protected InteractionClassHandle patientEnteredClinicHandle;
     protected ParameterHandle patientIdHandle;
+    protected List<Integer> enteredPatients = new ArrayList<>();
 
     public ClinicAmbassador(ClinicFederate federate){
         this.federate = federate;
@@ -141,7 +143,8 @@ public class ClinicAmbassador extends NullFederateAmbassador {
         if (interactionClass.equals(patientEnteredClinicHandle)) {
             try{
                 int id = decodeInt(theParameters, patientIdHandle);
-                log("Time:" + time +"Received pacient entered clinic " + id );
+                enteredPatients.add(id);
+                log("Time:" + time +" Received pacient entered clinic " + id );
             }
             catch (DecoderException e){
                 e.printStackTrace();
