@@ -57,12 +57,12 @@
 				<semantics>Clinic has opened</semantics>
 				<parameter>
 					<name>OpenTime</name>
-					<dataType>HLAfloat64Time</dataType>
+					<dataType>HLAfloat64BE</dataType>
 					<semantics>Time when clinc has opened or will open</semantics>
 				</parameter>
 				<parameter>
 					<name>CloseTime</name>
-					<dataType>HLAfloat64Time</dataType>
+					<dataType>HLAfloat64BE</dataType>
 					<semantics>Time when clinc will close</semantics>
 				</parameter>
 			</interactionClass>
@@ -75,6 +75,11 @@
                 <parameter>
                     <name>PatientId</name>
                     <dataType>HLAinteger32BE</dataType>
+                    <semantics>Patient's identifier</semantics>
+                </parameter>
+                <parameter>
+                    <name>EntryTime</name>
+                    <dataType>HLAfloat64BE</dataType>
                     <semantics>Patient's identifier</semantics>
                 </parameter>
             </interactionClass>

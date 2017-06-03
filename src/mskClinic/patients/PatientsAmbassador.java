@@ -133,7 +133,6 @@ public class PatientsAmbassador extends NullFederateAmbassador {
                 this.openTime = decodeDouble(theParameters, openingTimeHandle);
                 this.closeTime = decodeDouble(theParameters, closingTimeHandle);
                 log("Received clinic open interaction " + this.openTime + " " + this.closeTime);
-
             }
             catch (DecoderException e){
                 e.printStackTrace();
