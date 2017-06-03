@@ -1,6 +1,9 @@
 package mskClinic.clinic;
 
 import hla.rti1516e.*;
+import hla.rti1516e.encoding.DecoderException;
+import hla.rti1516e.encoding.HLAfloat64BE;
+import hla.rti1516e.encoding.HLAinteger32BE;
 import hla.rti1516e.exceptions.FederateInternalError;
 import hla.rti1516e.time.HLAfloat64Time;
 import org.portico.impl.hla1516e.types.time.DoubleTime;
@@ -19,6 +22,8 @@ public class ClinicAmbassador extends NullFederateAmbassador {
     //----------------------------------------------------------
     //                   INSTANCE VARIABLES
     //----------------------------------------------------------
+    private ClinicFederate federate;
+
     protected double federateTime        = 0.0;
     protected double grantedTime         = 0.0;
     protected double federateLookahead   = 1.0;
@@ -30,11 +35,12 @@ public class ClinicAmbassador extends NullFederateAmbassador {
     protected boolean isAnnounced        = false;
     protected boolean isReadyToRun       = false;
 
-    protected boolean running 			 = true;
-    protected int finishHandle           = 0;
-    protected InteractionClassHandle addProductHandle;
-    protected int getProductHandle = 0;
+    protected InteractionClassHandle patientEnteredClinicHandle;
+    protected ParameterHandle patientIdHandle;
 
+    public ClinicAmbassador(ClinicFederate federate){
+        this.federate = federate;
+    }
 
     private double convertTime( LogicalTime logicalTime )
     {
@@ -132,36 +138,21 @@ public class ClinicAmbassador extends NullFederateAmbassador {
                                     SupplementalReceiveInfo receiveInfo )
             throws FederateInternalError
     {
-        StringBuilder builder = new StringBuilder( "Interaction Received:" );
-
-        // print the handle
-        builder.append( " handle=" + interactionClass );
-
-        // print the tag
-        builder.append( ", tag=" + new String(tag) );
-        // print the time (if we have it) we'll get null if we are just receiving
-        // a forwarded call from the other reflect callback above
-        if( time != null )
-        {
-            builder.append( ", time=" + ((HLAfloat64Time)time).getValue() );
+        if (interactionClass.equals(patientEnteredClinicHandle)) {
+            try{
+                int id = decodeInt(theParameters, patientIdHandle);
+                log("Time:" + time +"Received pacient entered clinic " + id );
+            }
+            catch (DecoderException e){
+                e.printStackTrace();
+            }
         }
+    }
 
-        // print the parameer information
-        builder.append( ", parameterCount=" + theParameters.size() );
-        builder.append( "\n" );
-        for( ParameterHandle parameter : theParameters.keySet() )
-        {
-            // print the parameter handle
-            builder.append( "\tparamHandle=" );
-            builder.append( parameter );
-            // print the parameter value
-            builder.append( ", paramValue=" );
-            builder.append( theParameters.get(parameter).length );
-            builder.append( " bytes" );
-            builder.append( "\n" );
-        }
-
-        log( builder.toString() );
+    private int decodeInt(ParameterHandleValueMap theParameters, ParameterHandle handle) throws DecoderException{
+        HLAinteger32BE openPar = federate.encoderFactory.createHLAinteger32BE();
+        openPar.decode(theParameters.get(handle));
+        return openPar.getValue();
     }
 
     @Override

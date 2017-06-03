@@ -64,7 +64,7 @@ public class ClinicFederate {
         encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory();
         log("Clinic start scheduled to: " + openTime);
         log("Connecting...");
-        fedamb = new ClinicAmbassador();
+        fedamb = new ClinicAmbassador(this);
         rtiamb.connect(fedamb, CallbackModel.HLA_EVOKED);
 
         log("Creating Federation...");
@@ -160,12 +160,17 @@ public class ClinicFederate {
         AttributeHandleSet attributes = rtiamb.getAttributeHandleSetFactory().create();
         attributes.add(sizeHandle);
         attributes.add(peopleHandle);
-
         rtiamb.subscribeObjectClassAttributes(classHandle, attributes);
 
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
-
         rtiamb.publishInteractionClass(openClinicHandle);
+
+        InteractionClassHandle patientEnteredHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientEnteredClinic");
+        ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
+        ParameterHandle patientId = rtiamb.getParameterHandle(patientEnteredHandle, "PatientId");
+        fedamb.patientEnteredClinicHandle = patientEnteredHandle;
+        fedamb.patientIdHandle = patientId;
+        rtiamb.subscribeInteractionClass(patientEnteredHandle);
     }
 
     private void enableTimePolicy() throws RTIexception {
