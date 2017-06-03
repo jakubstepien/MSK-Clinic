@@ -25,7 +25,7 @@ public class ClinicFederate {
     public static final String READY_TO_RUN = "ReadyToRun";
 
     private static final Random rand = new Random();
-    private double closeTime = 2000;
+    private double closeTime = 200;
     private RTIambassador rtiamb;
     private ClinicAmbassador fedamb;
     private boolean opened = false;

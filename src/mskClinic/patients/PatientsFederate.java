@@ -27,7 +27,7 @@ public class PatientsFederate {
     private RTIambassador rtiamb;
     private PatientsAmbassador fedamb;
     private boolean clinicOpened = false;
-    private boolean started = false;
+    private boolean closing = false;
     private final double timeStep = 1;
     private int currentId = 1;
     private double nextStep;
@@ -41,6 +41,7 @@ public class PatientsFederate {
         while (true) {
             boolean sendPatient = false;
             double timeToAdvance;
+
             if(!clinicOpened){
                 if(fedamb.openTime != -1){
                     timeToAdvance = fedamb.openTime;
@@ -57,10 +58,22 @@ public class PatientsFederate {
                 }
             }
             else {
-                timeToAdvance = nextStep - fedamb.federateLookahead;
-                sendPatient = true;
+                if(!closing && nextStep < fedamb.closeTime){
+                    timeToAdvance = nextStep - fedamb.federateLookahead;
+                    sendPatient = true;
+                }
+                else{
+                    timeToAdvance = fedamb.closeTime - fedamb.federateLookahead;
+                    closing = true;
+                }
             }
             advanceTime(timeToAdvance);
+
+            if(closing){
+                log("Stopping spawning patients");
+                rtiamb.resignFederationExecution( ResignAction.DELETE_OBJECTS );
+                break;
+            }
 
             if (fedamb.grantedTime == timeToAdvance) {
                 timeToAdvance += fedamb.federateLookahead;
@@ -161,8 +174,6 @@ public class PatientsFederate {
         return ("(timestamp) " + System.currentTimeMillis()).getBytes();
     }
 
-    private void updateHLAObject(double time) throws RTIexception {
-    }
 
     private void advanceTime(double timeToAdvance) throws RTIexception {
         fedamb.isAdvancing = true;

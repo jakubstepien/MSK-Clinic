@@ -337,3 +337,51 @@ ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name
 ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
 ERROR [main] portico.lrc: FAILURE Regiser sync point [ReadyToRun] by [Patients]: already registered
 ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Patients]: label already registered
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
+ERROR [main] portico.lrc: FAILURE Regiser sync point [ReadyToRun] by [Patients]: already registered
+ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Patients]: label already registered
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-54507] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
+ERROR [main] portico.lrc: FAILURE Regiser sync point [ReadyToRun] by [Clinic]: already registered
+ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Clinic]: label already registered
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationTimeAlreadyPassed: Time 1999.0 has already passed
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-43409] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-43409] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
+ERROR [main] portico.lrc: FAILURE Regiser sync point [ReadyToRun] by [Clinic]: already registered
+ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Clinic]: label already registered
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationTimeAlreadyPassed: Time 199.0 has already passed
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-42454] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-42454] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
+ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Patients]: already announced
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationTimeAlreadyPassed: Time 200.0 has already passed
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-30457] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
+ERROR [main] portico.lrc: FAILURE Regiser sync point [ReadyToRun] by [Clinic]: already registered
+ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Clinic]: label already registered
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-29331] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-29331] portico.lrc.jgroups: Detected that federate [1] may have crashed, investigating...
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
+ERROR [main] portico.lrc: org.portico.lrc.compat.JFederationExecutionAlreadyExists: federation exists: ClinicFederation
+ERROR [main] portico.lrc: FAILURE Regiser sync point [ReadyToRun] by [Patients]: already registered
+ERROR [main] portico.lrc: FAILURE Register sync point [ReadyToRun] by [Patients]: label already registered
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
+WARN  [main] portico.lrc: MOM support is currently unsupported in IEEE-1516e federations.
