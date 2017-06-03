@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WaitingRoomFederate {
     public static final String FederationName = "ClinicFederation";
@@ -21,11 +23,37 @@ public class WaitingRoomFederate {
 
     private RTIambassador rtiamb;
     private WaitingRoomAmbassador fedamb;
-    private final double timeStep = 10.0;
-    private int stock = 10;
+    private final double timeStep = 1.0;
     private ObjectInstanceHandle storageHlaHandle;
     private HLAfloat64TimeFactory timeFactory;
+    private List<Integer> patientIds = new ArrayList<>();
     protected EncoderFactory encoderFactory;
+
+    public void mainLoop() throws Exception{
+        while (fedamb.running) {
+            double timeToAdvance = fedamb.federateTime + timeStep;
+            advanceTime(timeToAdvance);
+
+            addToWaintngRoom();
+
+            if (fedamb.grantedTime == timeToAdvance) {
+                timeToAdvance += fedamb.federateLookahead;
+                log("Time: " + timeToAdvance);
+                fedamb.federateTime = timeToAdvance;
+            }
+
+            tick();
+        }
+    }
+
+    public void addToWaintngRoom(){
+        fedamb.registeredPatients.stream().forEach(f -> {
+            log("Added to waiting room: " + f);
+            patientIds.add(f);
+        });
+        log("In waiting room are :" + patientIds.toString());
+        fedamb.registeredPatients.clear();
+    }
 
     public void runFederate() throws Exception {
 
@@ -35,7 +63,7 @@ public class WaitingRoomFederate {
 
         // connect
         log("Connecting...");
-        fedamb = new WaitingRoomAmbassador();
+        fedamb = new WaitingRoomAmbassador(this);
         rtiamb.connect(fedamb, CallbackModel.HLA_EVOKED);
 
         log("Creating Federation...");
@@ -78,21 +106,7 @@ public class WaitingRoomFederate {
         enableTimePolicy();
         publishAndSubscribe();
         registerWatingRoomObject();
-        while (fedamb.running) {
-
-            double timeToAdvance = fedamb.federateTime + timeStep;
-            advanceTime(timeToAdvance);
-
-            if (fedamb.grantedTime == timeToAdvance) {
-                timeToAdvance += fedamb.federateLookahead;
-                log("Time: " + timeToAdvance);
-                updateHLAObject(timeToAdvance);
-                fedamb.federateTime = timeToAdvance;
-            }
-
-            tick();
-        }
-
+        mainLoop();
     }
 
     private void waitForUser() {
@@ -109,10 +123,6 @@ public class WaitingRoomFederate {
     private void registerWatingRoomObject() throws RTIexception {
         ObjectClassHandle classHandle = rtiamb.getObjectClassHandle("ObjectRoot.WaitingRoom");
         this.storageHlaHandle = rtiamb.registerObjectInstance(classHandle);
-    }
-
-    private void updateHLAObject(double time) throws RTIexception {
-
     }
 
     private void advanceTime(double timeToAdvance) throws RTIexception {
@@ -141,6 +151,11 @@ public class WaitingRoomFederate {
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
         rtiamb.subscribeInteractionClass(openClinicHandle);
 
+        InteractionClassHandle patientRegistered = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientRegistered");
+        ParameterHandle patientId = rtiamb.getParameterHandle(patientRegistered, "PatientId");
+        fedamb.patientRegisteredHandle = patientRegistered;
+        fedamb.patientIdHandle = patientId;
+        rtiamb.subscribeInteractionClass(patientRegistered);
     }
 
     private void enableTimePolicy() throws RTIexception {
