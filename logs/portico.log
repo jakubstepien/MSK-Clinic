@@ -1,3 +1,1 @@
 ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation
-WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,Jakub-PC-27617] portico.lrc.jgroups: Detected that federate [unkonwn] may have crashed, investigating...
-WARN  [Regular] portico.lrc.jgroups: Unknown channel member crashed. Don't think it was a federate. Ignoring. uuid=f60b219f-8de3-4890-b2ab-f045874ad055
