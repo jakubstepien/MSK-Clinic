@@ -1,2 +1,1 @@
-WARN  [VERIFY_SUSPECT.TimerThread,ClinicFederation,MalgorzataPC-6119] portico.lrc.jgroups: Detected that federate [unkonwn] may have crashed, investigating...
-WARN  [Regular] portico.lrc.jgroups: Unknown channel member crashed. Don't think it was a federate. Ignoring. uuid=ec4eb378-e651-4010-b899-0730f1b57546
+ERROR [main] portico.lrc.jgroups: FAILURE createFederation: already exists, name=ClinicFederation

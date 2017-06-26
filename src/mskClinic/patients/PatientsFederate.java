@@ -70,7 +70,7 @@ public class PatientsFederate {
             advanceTime(timeToAdvance);
 
             if(closing){
-                log("Stopping spawning patients");
+                log("Stopping spawning enteredPatients");
                 rtiamb.resignFederationExecution( ResignAction.DELETE_OBJECTS );
                 break;
             }

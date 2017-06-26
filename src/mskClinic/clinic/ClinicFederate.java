@@ -201,16 +201,6 @@ public class ClinicFederate {
     }
 
     private void publishAndSubscribe() throws RTIexception {
-
-        ObjectClassHandle classHandle = rtiamb.getObjectClassHandle("HLAobjectRoot.WaitingRoom");
-        AttributeHandle sizeHandle = rtiamb.getAttributeHandle(classHandle, "NumberOfSeats");
-        AttributeHandle peopleHandle = rtiamb.getAttributeHandle(classHandle, "NumberOfPeopleInside");
-
-        AttributeHandleSet attributes = rtiamb.getAttributeHandleSetFactory().create();
-        attributes.add(sizeHandle);
-        attributes.add(peopleHandle);
-        rtiamb.subscribeObjectClassAttributes(classHandle, attributes);
-
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
         rtiamb.publishInteractionClass(openClinicHandle);
 
