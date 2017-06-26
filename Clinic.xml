@@ -15,35 +15,6 @@
     <objects>
         <objectClass>
             <name>HLAobjectRoot</name>
-            <objectClass>
-                <name>WaitingRoom</name>
-                <sharing>PublishSubscribe</sharing>
-                <semantics>Waiting room</semantics>
-                <attribute>
-                    <name>NumberOfSeats</name>
-                    <dataType>HLAinteger32BE</dataType>
-                    <updateType>Conditional</updateType>
-                    <updateCondition>Work flow</updateCondition>
-                    <ownership>NoTransfer</ownership>
-                    <sharing>PublishSubscribe</sharing>
-                    <dimensions/>
-                    <transportation>HLAreliable</transportation>
-                    <order>TimeStamp</order>
-                    <semantics>Amount seats in waitning room</semantics>
-                </attribute>
-                <attribute>
-                    <name>NumberOfPeopleInside</name>
-                    <dataType>HLAinteger32BE</dataType>
-                    <updateType>Conditional</updateType>
-                    <updateCondition>Work flow</updateCondition>
-                    <ownership>DivestAcquire</ownership>
-                    <sharing>PublishSubscribe</sharing>
-                    <dimensions/>
-                    <transportation>HLAreliable</transportation>
-                    <order>TimeStamp</order>
-                    <semantics>Amount of people in waitning room</semantics>
-                </attribute>
-            </objectClass>
         </objectClass>
     </objects>
     <interactions>
