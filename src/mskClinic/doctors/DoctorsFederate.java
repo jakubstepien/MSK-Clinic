@@ -8,11 +8,17 @@ import hla.rti1516e.time.HLAfloat64TimeFactory;
 import org.portico.impl.hla1516e.types.time.DoubleTime;
 import org.portico.impl.hla1516e.types.time.DoubleTimeInterval;
 
+import javax.swing.text.html.HTMLDocument;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Time;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -37,64 +43,73 @@ public class DoctorsFederate {
     private HLAfloat64TimeFactory timeFactory;
     protected EncoderFactory encoderFactory;
 
-    public void mainLoop() throws Exception {
-        while (true) {
-            boolean sendPatient = false;
-            double timeToAdvance;
 
-            if(!clinicOpened){
-                if(fedamb.openTime != -1){
-                    timeToAdvance = fedamb.openTime;
-                    clinicOpened = true;
-                    if(timeToAdvance < fedamb.federateTime){
-                        timeToAdvance = fedamb.federateTime  + timeStep;
-                        setNextStep(timeToAdvance);
-                    }
-                    else{
-                        setNextStep(fedamb.openTime + fedamb.federateLookahead);
-                    }
-                }else{
-                    timeToAdvance = fedamb.federateTime + timeStep;
-                }
-            }
-            else {
-                if(!closing && nextStep < fedamb.closeTime){
-                    timeToAdvance = nextStep - fedamb.federateLookahead;
-                    sendPatient = true;
-                }
-                else{
-                    timeToAdvance = fedamb.closeTime - fedamb.federateLookahead;
-                    closing = true;
-                }
-            }
+
+    public void mainLoop() throws Exception {
+        int doctorsCount = rand.nextInt(20);
+
+
+        boolean hasSendDoctors = false;
+        while (true) {
+
+            double timeToAdvance = fedamb.federateTime + fedamb.federateLookahead;
+//                if (fedamb.openTime != -1) {
+//
+//                    clinicOpened = true;
+//                    if (timeToAdvance < fedamb.federateTime) {
+//                        timeToAdvance = fedamb.federateTime + timeStep;
+//                        setNextStep(timeToAdvance);
+//                    } else {
+//                        setNextStep(fedamb.openTime + fedamb.federateLookahead);
+//                    }
+//                } else {
+//                    timeToAdvance = fedamb.federateTime + timeStep;
+//                }
+//            } else {
+//                //if(!closing && nextStep < fedamb.closeTime){
+//                timeToAdvance = nextStep - fedamb.federateLookahead;
+//                sendDoctors = true;
+//
+////                }
+////                else{
+////                    timeToAdvance = fedamb.closeTime - fedamb.federateLookahead;
+////                    closing = true;
+////                }
+//            }
+//
+
             advanceTime(timeToAdvance);
 
-            if(closing){
-                log("Stopping spawning doctors");
-                rtiamb.resignFederationExecution( ResignAction.DELETE_OBJECTS );
-                break;
-            }
-
             if (fedamb.grantedTime == timeToAdvance) {
-                timeToAdvance += fedamb.federateLookahead;
-                log("Time " + timeToAdvance);
-                if (sendPatient) {
-                    sendPatientEnteredClinic(timeToAdvance);
-                    setNextStep(timeToAdvance);
+                //timeToAdvance += fedamb.federateLookahead;
+                if (fedamb.openTime != -1 && !hasSendDoctors && fedamb.grantedTime >= fedamb.openTime - fedamb.federateLookahead) {
+                    DoctorsAvailable(timeToAdvance + fedamb.federateLookahead, doctorsCount);
+                    hasSendDoctors = true;
                 }
+                //jesli przychodnia otwarta i są pacjeci w przychodni
+                //if(fedamb.sendPatient)
+                //{
+                    //patientMedicationTime
+                    medicationPatient(timeToAdvance + fedamb.federateLookahead );
+
+                //}
+                log("Time " + timeToAdvance);
                 fedamb.federateTime = timeToAdvance;
             }
+
+
             tick();
         }
     }
 
     private void setNextStep(double time) {
-        nextStep = time +  nextStepMin + rand.nextInt(10) * nexStepMultiplier;
+        nextStep = time + nextStepMin + rand.nextInt(10) * nexStepMultiplier;
         log("next step " + nextStep);
     }
 
     public void runFederate() throws Exception {
         double openTime = rand.nextInt(40) + 20;
+
         log("Creating RTIambassador");
         rtiamb = RtiFactoryFactory.getRtiFactory().getRtiAmbassador();
         encoderFactory = RtiFactoryFactory.getRtiFactory().getEncoderFactory();
@@ -103,7 +118,7 @@ public class DoctorsFederate {
         log("Connecting...");
         fedamb = new DoctorsAmbassador(this);
         rtiamb.connect(fedamb, CallbackModel.HLA_EVOKED);
-
+        // log("Currently in clinic is " +doctorsCount+ " doctors");
         log("Creating Federation...");
         try {
             URL[] modules = new URL[]{
@@ -154,22 +169,39 @@ public class DoctorsFederate {
         } catch (Exception e) {
             log("Error while waiting for user input: " + e.getMessage());
             e.printStackTrace();
+
         }
     }
 
-    private void sendPatientEnteredClinic(double currentTime) throws RTIexception {
-        InteractionClassHandle patientEnteredHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientEnteredClinic");
-        ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
-        ParameterHandle patientId = rtiamb.getParameterHandle(patientEnteredHandle, "PatientId");
-        ParameterHandle entryTime = rtiamb.getParameterHandle(patientEnteredHandle,"EntryTime");
+    private void medicationPatient(double currentTime)
+    {
+        Iterator it = fedamb.patientsMedicationTimeMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer,Double> pair = ((Map.Entry<Integer,Double>)it.next());
+            if( currentTime >= pair.getValue())
+            {
+                it.remove();
+                //fedamb.patientsMedicationTimeMap.remove(pair.getKey());
+                log("koniec wizyty" + pair.getKey());
+                //KoniecWizyty
+            }
+        }
+    }
 
-        parameters.put(patientId, encoderFactory.createHLAinteger32BE(currentId).toByteArray());
-        parameters.put(entryTime, encoderFactory.createHLAfloat64BE(currentTime).toByteArray());
+
+    private void DoctorsAvailable(double currentTime, int doctorsCount) throws RTIexception {
+        InteractionClassHandle doctorsAvailableHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.DoctorsAvailable");
+        ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
+
+        ParameterHandle doctorsCountHandle = rtiamb.getParameterHandle(doctorsAvailableHandle, "DoctorsCount");
+        parameters.put(doctorsCountHandle, encoderFactory.createHLAinteger32BE(doctorsCount).toByteArray());
 
         HLAfloat64Time time = timeFactory.makeTime(currentTime);
-        rtiamb.sendInteraction(patientEnteredHandle, parameters, generateTag(), time);
-        log("added patient : " + currentId);
-        currentId++;
+
+        rtiamb.sendInteraction(doctorsAvailableHandle, parameters, generateTag(), time);
+        log("Currently in clinic is " + doctorsCount + " doctors");
+
+        //currentId++;
     }
 
     private byte[] generateTag() {
@@ -188,17 +220,28 @@ public class DoctorsFederate {
     }
 
     private void publishAndSubscribe() throws RTIexception {
-        InteractionClassHandle patientEnteredHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientEnteredClinic");
-        rtiamb.publishInteractionClass(patientEnteredHandle);
+//       InteractionClassHandle patientEnteredHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientEnteredClinic");
+//        rtiamb.publishInteractionClass(patientEnteredHandle);
 
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
         rtiamb.subscribeInteractionClass(openClinicHandle);
+
+        InteractionClassHandle doctorsCountHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.DoctorsAvailable");
+        rtiamb.publishInteractionClass(doctorsCountHandle);
+
         ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
         ParameterHandle openTime = rtiamb.getParameterHandle(openClinicHandle, "OpenTime");
-        ParameterHandle closeTime = rtiamb.getParameterHandle(openClinicHandle, "CloseTime");
+//       ParameterHandle closeTime = rtiamb.getParameterHandle(openClinicHandle, "CloseTime");
         fedamb.clinicOpenHandle = openClinicHandle;
+        fedamb.doctorsCountHandle = doctorsCountHandle;
         fedamb.openingTimeHandle = openTime;
-        fedamb.closingTimeHandle = closeTime;
+//       fedamb.closingTimeHandle = closeTime;
+
+        InteractionClassHandle beginVisiteHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.BeginVisite");
+        ParameterHandle patientID = rtiamb.getParameterHandle(beginVisiteHandle, "PatientIdInDoctor");
+        rtiamb.subscribeInteractionClass(beginVisiteHandle);
+        fedamb.beginVisiteHandle = beginVisiteHandle;
+        fedamb.patientIdInDoctorHandle = patientID;
     }
 
     private void enableTimePolicy() throws RTIexception {

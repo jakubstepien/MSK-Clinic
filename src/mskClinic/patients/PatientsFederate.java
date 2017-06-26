@@ -160,6 +160,7 @@ public class PatientsFederate {
     private void sendPatientEnteredClinic(double currentTime) throws RTIexception {
         InteractionClassHandle patientEnteredHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientEnteredClinic");
         ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
+
         ParameterHandle patientId = rtiamb.getParameterHandle(patientEnteredHandle, "PatientId");
         ParameterHandle entryTime = rtiamb.getParameterHandle(patientEnteredHandle,"EntryTime");
 
@@ -193,6 +194,7 @@ public class PatientsFederate {
 
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
         rtiamb.subscribeInteractionClass(openClinicHandle);
+
         ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
         ParameterHandle openTime = rtiamb.getParameterHandle(openClinicHandle, "OpenTime");
         ParameterHandle closeTime = rtiamb.getParameterHandle(openClinicHandle, "CloseTime");

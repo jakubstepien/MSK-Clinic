@@ -95,6 +95,52 @@
                     <semantics>Patient's identifier</semantics>
                 </parameter>
             </interactionClass>
+            <interactionClass>
+                <name>DoctorsAvailable</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>TimeStamp</order>
+                <semantics>Doctors are ready to work</semantics>
+                <parameter>
+                    <name>DoctorsCount</name>
+                    <dataType>HLAinteger32BE</dataType>
+                    <semantics>Beginer doctors count</semantics>
+                </parameter>
+                <parameter>
+                    <name>EntryTime</name>
+                    <dataType>HLAfloat64BE</dataType>
+                    <semantics>Patient's identifier</semantics>
+                </parameter>
+            </interactionClass>
+            <interactionClass>
+                <name>BeginVisite</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>TimeStamp</order>
+                <semantics></semantics>
+                <parameter>
+                    <name>PatientIdInDoctor</name>
+                    <dataType>HLAinteger32BE</dataType>
+                    <semantics></semantics>
+                </parameter>
+            </interactionClass>
+            <interactionClass>
+                <name>EndVisit</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>TimeStamp</order>
+                <semantics></semantics>
+                <parameter>
+                    <name>PatientIdEndVisit</name>
+                    <dataType>HLAinteger32BE</dataType>
+                    <semantics></semantics>
+                </parameter>
+                <parameter>
+                    <name>TimeEndVisit</name>
+                    <dataType>HLAfloat64BE</dataType>
+                    <semantics></semantics>
+                </parameter>
+            </interactionClass>
         </interactionClass>
     </interactions>
     <dimensions />

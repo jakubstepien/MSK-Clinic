@@ -34,7 +34,13 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
 
     protected List<Integer> registeredPatients = new ArrayList<>();
     protected InteractionClassHandle patientRegisteredHandle;
+    protected InteractionClassHandle doctorsAvailableHandle;
+    protected InteractionClassHandle beginVisiteHandle;
     protected ParameterHandle patientIdHandle;
+    protected ParameterHandle doctorsCountHandle;
+    protected ParameterHandle patientIdInDoctorHandle;
+    protected int doctorsCount;
+
 
     public WaitingRoomAmbassador(WaitingRoomFederate federate){
         this.federate = federate;
@@ -119,6 +125,18 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
                 int id = decodeInt(theParameters, patientIdHandle);
                 registeredPatients.add(id);
                 log("Time:" + time +" Received patient finished registering " + id );
+            }
+            catch (DecoderException e){
+                e.printStackTrace();
+            }
+        }
+
+        if (interactionClass.equals(doctorsAvailableHandle)) {
+            try{
+                doctorsCount = decodeInt(theParameters, doctorsCountHandle);
+                log("Time: " + time +" Przychodnia wie że jest " +doctorsCount+" lekarzy");
+//                int id = decodeInt(theParameters, patientIdHandle);
+//                registeredPatients.add(id);
             }
             catch (DecoderException e){
                 e.printStackTrace();

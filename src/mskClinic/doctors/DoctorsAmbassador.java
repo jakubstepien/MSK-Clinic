@@ -3,8 +3,14 @@ package mskClinic.doctors;
 import hla.rti1516e.*;
 import hla.rti1516e.encoding.DecoderException;
 import hla.rti1516e.encoding.HLAfloat64BE;
+import hla.rti1516e.encoding.HLAinteger32BE;
 import hla.rti1516e.exceptions.FederateInternalError;
 import org.portico.impl.hla1516e.types.time.DoubleTime;
+
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Malgorzata on 2017-06-14.
@@ -25,6 +31,7 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
     protected double federateLookahead = 1.0;
     protected double closeTime = -1;
     protected double openTime = -1;
+    protected double patientIdInDoctor = -1;
 
     protected boolean isRegulating = false;
     protected boolean isConstrained = false;
@@ -32,9 +39,14 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
 
     protected boolean isAnnounced = false;
     protected boolean isReadyToRun = false;
+    boolean sendPatient = false;
     protected InteractionClassHandle clinicOpenHandle;
+    protected InteractionClassHandle doctorsCountHandle;
+    protected InteractionClassHandle beginVisiteHandle;
     protected ParameterHandle openingTimeHandle;
     protected ParameterHandle closingTimeHandle;
+    protected ParameterHandle patientIdInDoctorHandle;
+    protected Map<Integer,Double> patientsMedicationTimeMap = new HashMap<Integer,Double>();
 
     public DoctorsAmbassador(DoctorsFederate federate) {
         this.federate = federate;
@@ -46,7 +58,7 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
     }
 
     private void log(String message) {
-        System.out.println("DoctorsFederateAmbassador2: " + message);
+        System.out.println("DoctorsFederateAmbassador: " + message);
     }
 
     @Override
@@ -120,10 +132,23 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
                                    SupplementalReceiveInfo receiveInfo)
             throws FederateInternalError {
         if (interactionClass.equals(clinicOpenHandle)) {
+
             try{
+                log("Time: " + time +" Lekarze odebrali" );
                 this.openTime = decodeDouble(theParameters, openingTimeHandle);
-                this.closeTime = decodeDouble(theParameters, closingTimeHandle);
-                log("Received clinic open interaction " + this.openTime + " " + this.closeTime);
+            }
+            catch (DecoderException e){
+                e.printStackTrace();
+            }
+        }
+        if (interactionClass.equals(beginVisiteHandle)) {
+
+            try{
+               int id = decodeInt(theParameters, patientIdInDoctorHandle);
+                log("Time: " + time +" odebranie pacjenta "+id );
+
+                patientsMedicationTimeMap.put(id,federateTime+30.0d);
+
             }
             catch (DecoderException e){
                 e.printStackTrace();
@@ -133,6 +158,12 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
 
     private double decodeDouble(ParameterHandleValueMap theParameters, ParameterHandle handle) throws DecoderException {
         HLAfloat64BE openPar = federate.encoderFactory.createHLAfloat64BE();
+        openPar.decode(theParameters.get(handle));
+        return openPar.getValue();
+    }
+
+    private int decodeInt(ParameterHandleValueMap theParameters, ParameterHandle handle) throws DecoderException{
+        HLAinteger32BE openPar = federate.encoderFactory.createHLAinteger32BE();
         openPar.decode(theParameters.get(handle));
         return openPar.getValue();
     }

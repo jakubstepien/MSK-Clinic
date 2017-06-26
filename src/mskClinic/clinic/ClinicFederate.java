@@ -69,7 +69,6 @@ public class ClinicFederate {
     }
 
     private void sendFinieshedRegistrationInteraction(int id, double currentTime) throws Exception {
-        log("Sending clinic Open");
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientRegistered");
         ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
         ParameterHandle patientId = rtiamb.getParameterHandle(openClinicHandle, "PatientId");
