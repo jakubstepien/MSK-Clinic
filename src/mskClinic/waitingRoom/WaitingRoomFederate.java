@@ -12,11 +12,13 @@ import org.portico.impl.hla1516e.types.time.DoubleTimeInterval;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class WaitingRoomFederate {
     public static final String FederationName = "ClinicFederation";
@@ -71,15 +73,18 @@ public class WaitingRoomFederate {
     }
 
     public void addToWaintngRoom(){
+        ArrayList<Integer> addedPatients = new ArrayList<>();
         fedamb.registeredPatients.stream().forEach(f -> {
             log("Added to waiting room: " + f);
             if(patientIds.size() <=WaintngRoomSize)
             {
+                addedPatients.add(f);
                 patientIds.add(f);
             }
         });
         log("In waiting room are :" + patientIds.toString());
-        fedamb.registeredPatients.clear();
+        fedamb.registeredPatients.removeAll(addedPatients);
+        log("Outside of waiting room :" + String.join(", ",fedamb.registeredPatients.stream().map(m -> m.toString()).collect(Collectors.toList())));
     }
 
     private void BeginVist(double currentTime, int id) throws RTIexception {
