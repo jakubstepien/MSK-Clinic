@@ -50,6 +50,8 @@ public class StatisticsAmbassador extends NullFederateAmbassador {
 
     protected InteractionClassHandle beginVisitHandle;
     protected ParameterHandle patientIdInDoctorHandle;
+    protected ParameterHandle endVisitHandle;
+
     protected ArrayList<PatientEnteredEvent> enteredPatients = new ArrayList<>();
     protected ArrayList<PatientEnteredEvent> patientsStartedVisit = new ArrayList<>();
 
@@ -151,8 +153,8 @@ public class StatisticsAmbassador extends NullFederateAmbassador {
         } else if(interactionClass.equals(beginVisitHandle)){
             try{
                 int patientId = decodeInt(theParameters, patientIdInDoctorHandle);
-                //TODO //TODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODO
-                patientsStartedVisit.add(new PatientEnteredEvent(patientId, -4654));
+                double endVisit = decodeDouble(theParameters,endVisitHandle);
+                patientsStartedVisit.add(new PatientEnteredEvent(patientId, endVisit));
                 log("Received patient started visit clinic id:" + patientId + " time:" + time);
             }
             catch (DecoderException e){

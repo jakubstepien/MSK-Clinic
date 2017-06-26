@@ -165,7 +165,9 @@ public class StatisticsFederate {
 
         InteractionClassHandle beginVisite = rtiamb.getInteractionClassHandle("HLAinteractionRoot.BeginVisite");
         ParameterHandle patientIdInDoctor = rtiamb.getParameterHandle(beginVisite, "PatientIdInDoctor");
+        ParameterHandle endVist = rtiamb.getParameterHandle(beginVisite, "TimeEndVisit");
         fedamb.beginVisitHandle = beginVisite;
+        fedamb.endVisitHandle = endVist;
         fedamb.patientIdInDoctorHandle = patientIdInDoctor;
         rtiamb.subscribeInteractionClass(beginVisite);
     }
