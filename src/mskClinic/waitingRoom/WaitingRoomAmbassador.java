@@ -36,6 +36,8 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
     protected InteractionClassHandle patientRegisteredHandle;
     protected InteractionClassHandle doctorsAvailableHandle;
     protected InteractionClassHandle beginVisiteHandle;
+    protected InteractionClassHandle endVisitHandle;
+    protected ParameterHandle patientIdEndVisitHandle;
     protected ParameterHandle patientIdHandle;
     protected ParameterHandle doctorsCountHandle;
     protected ParameterHandle patientIdInDoctorHandle;
@@ -137,6 +139,17 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
                 log("Time: " + time +" Przychodnia wie że jest " +doctorsCount+" lekarzy");
 //                int id = decodeInt(theParameters, patientIdHandle);
 //                registeredPatients.add(id);
+            }
+            catch (DecoderException e){
+                e.printStackTrace();
+            }
+        }
+
+        if (interactionClass.equals(endVisitHandle)) {
+            try{
+                int patientIdEndVisit = decodeInt(theParameters, patientIdEndVisitHandle);
+                log("Przychodnia wie że pacjent " +patientIdEndVisit+" skonczyl wizyte o "+time);
+//
             }
             catch (DecoderException e){
                 e.printStackTrace();

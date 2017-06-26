@@ -43,7 +43,9 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
     protected InteractionClassHandle clinicOpenHandle;
     protected InteractionClassHandle doctorsCountHandle;
     protected InteractionClassHandle beginVisiteHandle;
+    protected InteractionClassHandle endVisitHandle;
     protected ParameterHandle openingTimeHandle;
+    protected ParameterHandle patientIdEndVisitHandle;
     protected ParameterHandle closingTimeHandle;
     protected ParameterHandle patientIdInDoctorHandle;
     protected Map<Integer,Double> patientsMedicationTimeMap = new HashMap<Integer,Double>();

@@ -92,7 +92,7 @@ public class WaitingRoomFederate {
         HLAfloat64Time time = timeFactory.makeTime(currentTime);
 
         rtiamb.sendInteraction(patientIdInDoctor, parameters, generateTag(), time);
-        log("Wyslany do lekarza pacjęt" + id );
+        log("Wyslany do lekarza pacjęt " + id );
 
         //currentId++;
     }
@@ -215,6 +215,12 @@ public class WaitingRoomFederate {
         fedamb.beginVisiteHandle = beginVisite;
         fedamb.patientIdInDoctorHandle = patientIdInDoctor;
         rtiamb.publishInteractionClass(beginVisite);
+
+        InteractionClassHandle endVisitHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.EndVisit");
+        ParameterHandle patientIdEndVisit = rtiamb.getParameterHandle(endVisitHandle, "PatientIdEndVisit");
+        fedamb.endVisitHandle = endVisitHandle;
+        fedamb.patientIdEndVisitHandle = patientIdEndVisit;
+        rtiamb.subscribeInteractionClass(endVisitHandle);
     }
 
     private void enableTimePolicy() throws RTIexception {

@@ -46,7 +46,7 @@ public class DoctorsFederate {
 
 
     public void mainLoop() throws Exception {
-        int doctorsCount = rand.nextInt(20);
+        int doctorsCount = rand.nextInt(20)+1;
 
 
         boolean hasSendDoctors = false;
@@ -91,6 +91,7 @@ public class DoctorsFederate {
                 //{
                     //patientMedicationTime
                     medicationPatient(timeToAdvance + fedamb.federateLookahead );
+
 
                 //}
                 log("Time " + timeToAdvance);
@@ -173,7 +174,7 @@ public class DoctorsFederate {
         }
     }
 
-    private void medicationPatient(double currentTime)
+    private void medicationPatient(double currentTime)throws RTIexception
     {
         Iterator it = fedamb.patientsMedicationTimeMap.entrySet().iterator();
         while (it.hasNext()) {
@@ -182,12 +183,28 @@ public class DoctorsFederate {
             {
                 it.remove();
                 //fedamb.patientsMedicationTimeMap.remove(pair.getKey());
+
                 log("koniec wizyty" + pair.getKey());
-                //KoniecWizyty
+                EndOfVisit(currentTime,pair.getKey(), pair.getValue() );
             }
         }
     }
 
+    private void EndOfVisit (double currentTime, int patientIdEndVisit, double timeEndVisit ) throws RTIexception {
+        InteractionClassHandle endVisitHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.EndVisit");
+        ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
+
+        ParameterHandle patientIdEndVisitHandle = rtiamb.getParameterHandle(endVisitHandle, "PatientIdEndVisit");
+        parameters.put(patientIdEndVisitHandle, encoderFactory.createHLAinteger32BE(patientIdEndVisit).toByteArray());
+
+        ParameterHandle timeEndVisitHandle = rtiamb.getParameterHandle(endVisitHandle, "TimeEndVisit");
+        parameters.put(timeEndVisitHandle, encoderFactory.createHLAfloat64BE(timeEndVisit).toByteArray());
+
+        HLAfloat64Time time = timeFactory.makeTime(currentTime);
+
+        rtiamb.sendInteraction(endVisitHandle, parameters, generateTag(), time);
+        log("EndOfVisit" + patientIdEndVisit);
+    }
 
     private void DoctorsAvailable(double currentTime, int doctorsCount) throws RTIexception {
         InteractionClassHandle doctorsAvailableHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.DoctorsAvailable");
@@ -239,9 +256,15 @@ public class DoctorsFederate {
 
         InteractionClassHandle beginVisiteHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.BeginVisite");
         ParameterHandle patientID = rtiamb.getParameterHandle(beginVisiteHandle, "PatientIdInDoctor");
-        rtiamb.subscribeInteractionClass(beginVisiteHandle);
         fedamb.beginVisiteHandle = beginVisiteHandle;
         fedamb.patientIdInDoctorHandle = patientID;
+        rtiamb.subscribeInteractionClass(beginVisiteHandle);
+
+        InteractionClassHandle endVisitHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.EndVisit");
+        ParameterHandle patientIdEndVisit = rtiamb.getParameterHandle(endVisitHandle, "PatientIdEndVisit");
+        fedamb.endVisitHandle = endVisitHandle;
+        fedamb.patientIdEndVisitHandle = patientIdEndVisit;
+        rtiamb.publishInteractionClass(endVisitHandle);
     }
 
     private void enableTimePolicy() throws RTIexception {
