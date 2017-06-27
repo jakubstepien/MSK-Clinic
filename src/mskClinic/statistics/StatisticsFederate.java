@@ -4,7 +4,6 @@ import hla.rti1516e.*;
 import hla.rti1516e.encoding.EncoderFactory;
 import hla.rti1516e.exceptions.*;
 import hla.rti1516e.time.HLAfloat64TimeFactory;
-import mskClinic.patients.PatientsAmbassador;
 import org.portico.impl.hla1516e.types.time.DoubleTime;
 import org.portico.impl.hla1516e.types.time.DoubleTimeInterval;
 
@@ -35,11 +34,14 @@ public class StatisticsFederate {
     private HLAfloat64TimeFactory timeFactory;
     protected EncoderFactory encoderFactory;
 
-    private HashMap<Integer,Double> patientsEntryTimes = new HashMap<Integer, Double>();
-    private HashMap<Integer,Double> patientsVistTimes = new HashMap<Integer, Double>();
+    private HashMap<Integer, Double> patientsEntryTimes = new HashMap<Integer, Double>();
+    private HashMap<Integer, Double> patientsVistTimes = new HashMap<Integer, Double>();
 
     public void mainLoop() throws Exception {
         while (true) {
+            if (fedamb.clinicClosed) {
+                break;
+            }
             double timeToAdvance = fedamb.federateTime + timeStep;
 
             advanceTime(timeToAdvance);
@@ -54,19 +56,25 @@ public class StatisticsFederate {
             }
             tick();
         }
+        for(int patient : patientsVistTimes.keySet()){
+            double entry = patientsEntryTimes.get(patient);
+            double startedVisit = patientsVistTimes.get(patient);
+            double wait = startedVisit - entry;
+            log("Patient " + patient + " entered clinic at " + entry  + " started visit at " +startedVisit + " waited " + wait);
+        }
     }
 
-    private void addEnteredPatientsToStatistics(){
-        fedamb.enteredPatients.forEach(f ->{
-            patientsEntryTimes.put(f.getId(),f.getTime());
+    private void addEnteredPatientsToStatistics() {
+        fedamb.enteredPatients.forEach(f -> {
+            patientsEntryTimes.put(f.getId(), f.getTime());
             log("Added patient " + f.getId() + " with entry time " + f.getTime() + " to statistics");
         });
         fedamb.enteredPatients.clear();
     }
 
-    private  void addPatientsStartedVistToStatistics(){
-        fedamb.patientsStartedVisit.forEach(f ->{
-            patientsVistTimes.put(f.getId(),f.getTime());
+    private void addPatientsStartedVistToStatistics() {
+        fedamb.patientsStartedVisit.forEach(f -> {
+            patientsVistTimes.put(f.getId(), f.getTime());
             log("Added patient started visit " + f.getId() + " with visit start time " + f.getTime() + " to statistics");
             double waitTime = patientsVistTimes.get(f.getId()) - patientsEntryTimes.get(f.getId());
             log("Patient " + f.getId() + " waited " + waitTime);
@@ -125,6 +133,15 @@ public class StatisticsFederate {
         enableTimePolicy();
         publishAndSubscribe();
         mainLoop();
+        rtiamb.resignFederationExecution(ResignAction.DELETE_OBJECTS);
+        try {
+            rtiamb.destroyFederationExecution(FederationName);
+            log("Destroyed Federation");
+        } catch (FederationExecutionDoesNotExist dne) {
+            log("No need to destroy federation, it doesn't exist");
+        } catch (FederatesCurrentlyJoined fcj) {
+            log("Didn't destroy federation, federates still joined");
+        }
     }
 
     private void waitForUser() {
@@ -163,11 +180,15 @@ public class StatisticsFederate {
         fedamb.entryTimeHandle = patientEntryTime;
         rtiamb.subscribeInteractionClass(patientEnteredHandle);
 
+        InteractionClassHandle closeClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicClosed");
+        rtiamb.subscribeInteractionClass(closeClinicHandle);
+        fedamb.closeClinic = closeClinicHandle;
+
         InteractionClassHandle beginVisite = rtiamb.getInteractionClassHandle("HLAinteractionRoot.BeginVisite");
         ParameterHandle patientIdInDoctor = rtiamb.getParameterHandle(beginVisite, "PatientIdInDoctor");
-        ParameterHandle endVist = rtiamb.getParameterHandle(beginVisite, "TimeEndVisit");
+        ParameterHandle vistTime = rtiamb.getParameterHandle(beginVisite, "StartVisitTime");
         fedamb.beginVisitHandle = beginVisite;
-        fedamb.endVisitHandle = endVist;
+        fedamb.visitTimeHandle = vistTime;
         fedamb.patientIdInDoctorHandle = patientIdInDoctor;
         rtiamb.subscribeInteractionClass(beginVisite);
     }

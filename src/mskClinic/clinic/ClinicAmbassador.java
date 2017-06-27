@@ -25,147 +25,146 @@ public class ClinicAmbassador extends NullFederateAmbassador {
     //----------------------------------------------------------
     private ClinicFederate federate;
 
-    protected double federateTime        = 0.0;
-    protected double grantedTime         = 0.0;
-    protected double federateLookahead   = 1.0;
+    protected double federateTime = 0.0;
+    protected double grantedTime = 0.0;
+    protected double federateLookahead = 1.0;
 
-    protected boolean isRegulating       = false;
-    protected boolean isConstrained      = false;
-    protected boolean isAdvancing        = false;
+    protected boolean isRegulating = false;
+    protected boolean isConstrained = false;
+    protected boolean isAdvancing = false;
 
-    protected boolean isAnnounced        = false;
-    protected boolean isReadyToRun       = false;
+    protected boolean isAnnounced = false;
+    protected boolean isReadyToRun = false;
 
     protected InteractionClassHandle patientEnteredClinicHandle;
     protected ParameterHandle patientIdHandle;
+    protected InteractionClassHandle endVisitHandle;
+    protected ParameterHandle patientIdEndVisitHandle;
     protected List<Integer> enteredPatients = new ArrayList<>();
+    protected List<Integer> leftPatients = new ArrayList<>();
 
-    public ClinicAmbassador(ClinicFederate federate){
+    public ClinicAmbassador(ClinicFederate federate) {
         this.federate = federate;
     }
 
-    private double convertTime( LogicalTime logicalTime )
-    {
+    private double convertTime(LogicalTime logicalTime) {
         // PORTICO SPECIFIC!!
-        return ((DoubleTime)logicalTime).getTime();
+        return ((DoubleTime) logicalTime).getTime();
     }
 
-    private void log( String message )
-    {
-        System.out.println( "ClinicFederateAmbassador: " + message );
+    private void log(String message) {
+        System.out.println("ClinicFederateAmbassador: " + message);
     }
 
     @Override
-    public void synchronizationPointRegistrationFailed( String label,
-                                                        SynchronizationPointFailureReason reason )
-    {
-        log( "Failed to register sync point: " + label + ", reason="+reason );
+    public void synchronizationPointRegistrationFailed(String label,
+                                                       SynchronizationPointFailureReason reason) {
+        log("Failed to register sync point: " + label + ", reason=" + reason);
     }
 
 
     @Override
-    public void synchronizationPointRegistrationSucceeded( String label )
-    {
-        log( "Successfully registered sync point: " + label );
+    public void synchronizationPointRegistrationSucceeded(String label) {
+        log("Successfully registered sync point: " + label);
     }
 
     @Override
-    public void announceSynchronizationPoint( String label, byte[] tag )
-    {
-        log( "Synchronization point announced: " + label );
-        if( label.equals(ClinicFederate.READY_TO_RUN) )
+    public void announceSynchronizationPoint(String label, byte[] tag) {
+        log("Synchronization point announced: " + label);
+        if (label.equals(ClinicFederate.READY_TO_RUN))
             this.isAnnounced = true;
     }
 
     @Override
-    public void federationSynchronized( String label, FederateHandleSet failed )
-    {
-        log( "Federation Synchronized: " + label );
-        if( label.equals(ClinicFederate.READY_TO_RUN) )
+    public void federationSynchronized(String label, FederateHandleSet failed) {
+        log("Federation Synchronized: " + label);
+        if (label.equals(ClinicFederate.READY_TO_RUN))
             this.isReadyToRun = true;
     }
 
     /**
      * The RTI has informed us that time regulation is now enabled.
      */
-    public void timeRegulationEnabled( LogicalTime theFederateTime )
-    {
-        this.federateTime = convertTime( theFederateTime );
+    public void timeRegulationEnabled(LogicalTime theFederateTime) {
+        this.federateTime = convertTime(theFederateTime);
         this.isRegulating = true;
     }
 
-    public void timeConstrainedEnabled( LogicalTime theFederateTime )
-    {
-        this.federateTime = convertTime( theFederateTime );
+    public void timeConstrainedEnabled(LogicalTime theFederateTime) {
+        this.federateTime = convertTime(theFederateTime);
         this.isConstrained = true;
     }
 
-    public void timeAdvanceGrant( LogicalTime theTime )
-    {
-        this.grantedTime = convertTime( theTime );
+    public void timeAdvanceGrant(LogicalTime theTime) {
+        this.grantedTime = convertTime(theTime);
         this.isAdvancing = false;
     }
 
 
     @Override
-    public void receiveInteraction( InteractionClassHandle interactionClass,
-                                    ParameterHandleValueMap theParameters,
-                                    byte[] tag,
-                                    OrderType sentOrdering,
-                                    TransportationTypeHandle theTransport,
-                                    SupplementalReceiveInfo receiveInfo )
-            throws FederateInternalError
-    {
+    public void receiveInteraction(InteractionClassHandle interactionClass,
+                                   ParameterHandleValueMap theParameters,
+                                   byte[] tag,
+                                   OrderType sentOrdering,
+                                   TransportationTypeHandle theTransport,
+                                   SupplementalReceiveInfo receiveInfo)
+            throws FederateInternalError {
         // just pass it on to the other method for printing purposes
         // passing null as the time will let the other method know it
         // it from us, not from the RTI
-        this.receiveInteraction( interactionClass,
+        this.receiveInteraction(interactionClass,
                 theParameters,
                 tag,
                 sentOrdering,
                 theTransport,
                 null,
                 sentOrdering,
-                receiveInfo );
+                receiveInfo);
     }
 
     @Override
-    public void receiveInteraction( InteractionClassHandle interactionClass,
-                                    ParameterHandleValueMap theParameters,
-                                    byte[] tag,
-                                    OrderType sentOrdering,
-                                    TransportationTypeHandle theTransport,
-                                    LogicalTime time,
-                                    OrderType receivedOrdering,
-                                    SupplementalReceiveInfo receiveInfo )
-            throws FederateInternalError
-    {
+    public void receiveInteraction(InteractionClassHandle interactionClass,
+                                   ParameterHandleValueMap theParameters,
+                                   byte[] tag,
+                                   OrderType sentOrdering,
+                                   TransportationTypeHandle theTransport,
+                                   LogicalTime time,
+                                   OrderType receivedOrdering,
+                                   SupplementalReceiveInfo receiveInfo)
+            throws FederateInternalError {
         if (interactionClass.equals(patientEnteredClinicHandle)) {
-            try{
+            try {
                 int id = decodeInt(theParameters, patientIdHandle);
                 enteredPatients.add(id);
-                log("Time:" + time +" Received pacient entered clinic " + id );
+                log("Time:" + time + " Received pacient entered clinic " + id);
+            } catch (DecoderException e) {
+                e.printStackTrace();
             }
-            catch (DecoderException e){
+        }
+        if (interactionClass.equals(endVisitHandle)) {
+            try {
+                int id = decodeInt(theParameters, patientIdEndVisitHandle);
+                leftPatients.add(id);
+                log("Time:" + time + " Received pacient ended visit " + id);
+            } catch (DecoderException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private int decodeInt(ParameterHandleValueMap theParameters, ParameterHandle handle) throws DecoderException{
+    private int decodeInt(ParameterHandleValueMap theParameters, ParameterHandle handle) throws DecoderException {
         HLAinteger32BE openPar = federate.encoderFactory.createHLAinteger32BE();
         openPar.decode(theParameters.get(handle));
         return openPar.getValue();
     }
 
     @Override
-    public void removeObjectInstance( ObjectInstanceHandle theObject,
-                                      byte[] tag,
-                                      OrderType sentOrdering,
-                                      FederateAmbassador.SupplementalRemoveInfo removeInfo )
-            throws FederateInternalError
-    {
-        log( "Object Removed: handle=" + theObject );
+    public void removeObjectInstance(ObjectInstanceHandle theObject,
+                                     byte[] tag,
+                                     OrderType sentOrdering,
+                                     FederateAmbassador.SupplementalRemoveInfo removeInfo)
+            throws FederateInternalError {
+        log("Object Removed: handle=" + theObject);
     }
 
 }

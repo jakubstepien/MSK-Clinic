@@ -31,18 +31,19 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
     protected boolean isAnnounced        = false;
     protected boolean isReadyToRun       = false;
     protected boolean running 			 = true;
+    protected boolean clinicClosed = false;
 
     protected List<Integer> registeredPatients = new ArrayList<>();
     protected InteractionClassHandle patientRegisteredHandle;
     protected InteractionClassHandle doctorsAvailableHandle;
     protected InteractionClassHandle beginVisiteHandle;
     protected InteractionClassHandle endVisitHandle;
+    protected InteractionClassHandle closeClinic;
     protected ParameterHandle patientIdEndVisitHandle;
     protected ParameterHandle patientIdHandle;
     protected ParameterHandle doctorsCountHandle;
     protected ParameterHandle patientIdInDoctorHandle;
     protected int doctorsCount;
-
 
     public WaitingRoomAmbassador(WaitingRoomFederate federate){
         this.federate = federate;
@@ -137,8 +138,7 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
             try{
                 doctorsCount = decodeInt(theParameters, doctorsCountHandle);
                 log("Time: " + time +" Przychodnia wie że jest " +doctorsCount+" lekarzy");
-//                int id = decodeInt(theParameters, patientIdHandle);
-//                registeredPatients.add(id);
+
             }
             catch (DecoderException e){
                 e.printStackTrace();
@@ -149,11 +149,16 @@ public class WaitingRoomAmbassador extends NullFederateAmbassador {
             try{
                 int patientIdEndVisit = decodeInt(theParameters, patientIdEndVisitHandle);
                 log("Przychodnia wie że pacjent " +patientIdEndVisit+" skonczyl wizyte o "+time);
-//
+                federate.sentPatientCount--;
             }
             catch (DecoderException e){
                 e.printStackTrace();
             }
+        }
+
+        if(interactionClass.equals(closeClinic)){
+            clinicClosed = true;
+            log("Recived clinic close");
         }
     }
 

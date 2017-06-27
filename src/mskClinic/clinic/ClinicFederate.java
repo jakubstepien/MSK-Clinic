@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -38,15 +39,22 @@ public class ClinicFederate {
     private HLAfloat64TimeFactory timeFactory;
     protected EncoderFactory encoderFactory;
     private PriorityQueue<PatientInRegistering> patientsInRegistering = new PriorityQueue<>(new PatientInRegisteringComparator());
+    private ArrayList<Integer> patientsInClinic = new ArrayList<>();
 
     private void mainLoop(double openTime) throws Exception {
         while (!canClose) {
             double timeToAdvance = getTimeToAdvance(openTime);
             advanceTime(timeToAdvance);
             refreshRegistering();
+            refreshLeftPatients();
+
             if (fedamb.grantedTime == timeToAdvance) {
                 timeToAdvance += fedamb.federateLookahead;
                 log("Time " + timeToAdvance);
+                if (fedamb.federateTime > closeTime && patientsInClinic.size() == 0) {
+                    sendClinicClose(timeToAdvance);
+                    break;
+                }
                 if (!opened && timeToAdvance + fedamb.federateLookahead >= openTime) {
                     sendClinicOpen(timeToAdvance);
                     opened = true;
@@ -62,8 +70,8 @@ public class ClinicFederate {
         List<PatientInRegistering> nowFinished = patientsInRegistering.stream()
                 .filter(f -> f.getFinishTime() <= currentTime)
                 .collect(Collectors.toList());
-        for (PatientInRegistering patient : nowFinished){
-            sendFinieshedRegistrationInteraction(patient.getId(),currentTime);
+        for (PatientInRegistering patient : nowFinished) {
+            sendFinieshedRegistrationInteraction(patient.getId(), currentTime);
             patientsInRegistering.remove(patient);
         }
     }
@@ -83,9 +91,15 @@ public class ClinicFederate {
         fedamb.enteredPatients.stream().forEach(f -> {
             int registrationTime = getRegistrationTime();
             log("Added to registration " + f + " " + registrationTime);
-            patientsInRegistering.add(new PatientInRegistering(f,registrationTime));
+            patientsInRegistering.add(new PatientInRegistering(f, registrationTime));
+            patientsInClinic.add(f);
         });
         fedamb.enteredPatients.clear();
+    }
+
+    private void refreshLeftPatients() {
+        patientsInClinic.removeAll(fedamb.leftPatients);
+        log("Patients in clinic: " + String.join(", ", patientsInClinic.stream().map(m -> m.toString()).collect(Collectors.toList())));
     }
 
     private int getRegistrationTime() {
@@ -96,7 +110,7 @@ public class ClinicFederate {
         double timeToAdvance = fedamb.federateTime + timeStep;
         if (!opened && timeToAdvance > openTime - fedamb.federateLookahead) {
             timeToAdvance = openTime - fedamb.federateLookahead;
-        } else if(patientsInRegistering.size() > 0) {
+        } else if (patientsInRegistering.size() > 0) {
             double nextRegistrationFinish = patientsInRegistering.peek().getFinishTime();
             if (timeToAdvance >= nextRegistrationFinish - fedamb.federateLookahead
                     && nextRegistrationFinish - fedamb.federateLookahead > fedamb.federateTime) {
@@ -156,6 +170,15 @@ public class ClinicFederate {
         enableTimePolicy();
         publishAndSubscribe();
         mainLoop(openTime);
+        rtiamb.resignFederationExecution(ResignAction.DELETE_OBJECTS);
+        try {
+            rtiamb.destroyFederationExecution(FederationName);
+            log("Destroyed Federation");
+        } catch (FederationExecutionDoesNotExist dne) {
+            log("No need to destroy federation, it doesn't exist");
+        } catch (FederatesCurrentlyJoined fcj) {
+            log("Didn't destroy federation, federates still joined");
+        }
     }
 
     private void waitForUser() {
@@ -183,6 +206,15 @@ public class ClinicFederate {
         rtiamb.sendInteraction(openClinicHandle, parameters, generateTag(), time);
     }
 
+    private void sendClinicClose(double currentTime) throws RTIexception {
+        log("Sending clinic Close");
+        InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicClosed");
+        ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
+
+        HLAfloat64Time time = timeFactory.makeTime(currentTime);
+        rtiamb.sendInteraction(openClinicHandle, parameters, generateTag(), time);
+    }
+
     private byte[] generateTag() {
         return ("(timestamp) " + System.currentTimeMillis()).getBytes();
     }
@@ -204,6 +236,9 @@ public class ClinicFederate {
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
         rtiamb.publishInteractionClass(openClinicHandle);
 
+        InteractionClassHandle closeClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicClosed");
+        rtiamb.publishInteractionClass(closeClinicHandle);
+
         InteractionClassHandle patientRegistered = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientRegistered");
         rtiamb.publishInteractionClass(patientRegistered);
 
@@ -213,6 +248,12 @@ public class ClinicFederate {
         fedamb.patientEnteredClinicHandle = patientEnteredHandle;
         fedamb.patientIdHandle = patientId;
         rtiamb.subscribeInteractionClass(patientEnteredHandle);
+
+        InteractionClassHandle endVisitHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.EndVisit");
+        ParameterHandle patientIdEndVisit = rtiamb.getParameterHandle(endVisitHandle, "PatientIdEndVisit");
+        fedamb.endVisitHandle = endVisitHandle;
+        fedamb.patientIdEndVisitHandle = patientIdEndVisit;
+        rtiamb.subscribeInteractionClass(endVisitHandle);
     }
 
     private void enableTimePolicy() throws RTIexception {

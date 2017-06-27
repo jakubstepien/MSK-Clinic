@@ -1,6 +1,5 @@
 package mskClinic.statistics;
 
-import hla.rti1516.*;
 import hla.rti1516e.*;
 import hla.rti1516e.FederateAmbassador;
 import hla.rti1516e.FederateHandleSet;
@@ -44,13 +43,16 @@ public class StatisticsAmbassador extends NullFederateAmbassador {
 
     protected boolean isAnnounced = false;
     protected boolean isReadyToRun = false;
+    protected boolean clinicClosed = false;
     protected InteractionClassHandle patientEnteredClinicHandle;
     protected ParameterHandle entryTimeHandle;
     protected ParameterHandle patientIdHandle;
 
     protected InteractionClassHandle beginVisitHandle;
     protected ParameterHandle patientIdInDoctorHandle;
-    protected ParameterHandle endVisitHandle;
+    protected ParameterHandle visitTimeHandle;
+
+    protected InteractionClassHandle closeClinic;
 
     protected ArrayList<PatientEnteredEvent> enteredPatients = new ArrayList<>();
     protected ArrayList<PatientEnteredEvent> patientsStartedVisit = new ArrayList<>();
@@ -153,13 +155,17 @@ public class StatisticsAmbassador extends NullFederateAmbassador {
         } else if(interactionClass.equals(beginVisitHandle)){
             try{
                 int patientId = decodeInt(theParameters, patientIdInDoctorHandle);
-                double endVisit = decodeDouble(theParameters,endVisitHandle);
-                patientsStartedVisit.add(new PatientEnteredEvent(patientId, endVisit));
-                log("Received patient started visit clinic id:" + patientId + " time:" + time);
+                double visitTime = decodeDouble(theParameters, visitTimeHandle);
+                patientsStartedVisit.add(new PatientEnteredEvent(patientId, visitTime));
+                log("Received patient started visit clinic id:" + patientId + " time:" + visitTime);
             }
             catch (DecoderException e){
                 e.printStackTrace();
             }
+        }
+        else if(interactionClass.equals(closeClinic)){
+            clinicClosed = true;
+            log("Recived clinic close");
         }
     }
 

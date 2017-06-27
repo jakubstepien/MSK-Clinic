@@ -33,14 +33,18 @@ public class WaitingRoomFederate {
     private HLAfloat64TimeFactory timeFactory;
     private List<Integer> patientIds = new ArrayList<>();
     //List<Integer> patientToDoctors= new ArrayList<>();
-    private int sentPatientCount=0;
+    protected int sentPatientCount = 0;
     int WaintngRoomSize = rand.nextInt(20);
 
     protected EncoderFactory encoderFactory;
 
-    public void mainLoop() throws Exception{
+    public void mainLoop() throws Exception {
 
         while (fedamb.running) {
+            if (fedamb.clinicClosed) {
+                return;
+            }
+
             double timeToAdvance = fedamb.federateTime + timeStep;
             advanceTime(timeToAdvance);
             //
@@ -57,34 +61,30 @@ public class WaitingRoomFederate {
         }
     }
 
-    public void setPatientToDoctors (double time) throws Exception
-    {
-        while(sentPatientCount < fedamb.doctorsCount)
-        {
-            if( patientIds.size()>0)
-            {
+    public void setPatientToDoctors(double time) throws Exception {
+        while (sentPatientCount < fedamb.doctorsCount) {
+            if (patientIds.size() > 0) {
                 Integer tempPatient = patientIds.get(0);
                 //WyslanieDoLekarza(tempPatient);
-                BeginVist(time,tempPatient);
+                BeginVist(time, tempPatient);
                 patientIds.remove(0);
                 sentPatientCount++;
-            }else return;
+            } else return;
         }
     }
 
-    public void addToWaintngRoom(){
+    public void addToWaintngRoom() {
         ArrayList<Integer> addedPatients = new ArrayList<>();
         fedamb.registeredPatients.stream().forEach(f -> {
             log("Added to waiting room: " + f);
-            if(patientIds.size() <=WaintngRoomSize)
-            {
+            if (patientIds.size() <= WaintngRoomSize) {
                 addedPatients.add(f);
                 patientIds.add(f);
             }
         });
         log("In waiting room are :" + patientIds.toString());
         fedamb.registeredPatients.removeAll(addedPatients);
-        log("Outside of waiting room :" + String.join(", ",fedamb.registeredPatients.stream().map(m -> m.toString()).collect(Collectors.toList())));
+        log("Outside of waiting room :" + String.join(", ", fedamb.registeredPatients.stream().map(m -> m.toString()).collect(Collectors.toList())));
     }
 
     private void BeginVist(double currentTime, int id) throws RTIexception {
@@ -92,14 +92,15 @@ public class WaitingRoomFederate {
         ParameterHandleValueMap parameters = rtiamb.getParameterHandleValueMapFactory().create(0);
 
         ParameterHandle patientIDHandle = rtiamb.getParameterHandle(patientIdInDoctor, "PatientIdInDoctor");
-        parameters.put(patientIDHandle, encoderFactory.createHLAinteger32BE(id).toByteArray());
+        ParameterHandle startVisitHandle = rtiamb.getParameterHandle(patientIdInDoctor, "StartVisitTime");
 
+        parameters.put(patientIDHandle, encoderFactory.createHLAinteger32BE(id).toByteArray());
+        parameters.put(startVisitHandle, encoderFactory.createHLAfloat64BE(currentTime).toByteArray());
         HLAfloat64Time time = timeFactory.makeTime(currentTime);
 
         rtiamb.sendInteraction(patientIdInDoctor, parameters, generateTag(), time);
-        log("Wyslany do lekarza pacjęt " + id );
+        log("Wyslany do lekarza pacjęt " + id);
 
-        //currentId++;
     }
 
     private byte[] generateTag() {
@@ -158,6 +159,15 @@ public class WaitingRoomFederate {
         enableTimePolicy();
         publishAndSubscribe();
         mainLoop();
+        rtiamb.resignFederationExecution(ResignAction.DELETE_OBJECTS);
+        try {
+            rtiamb.destroyFederationExecution(FederationName);
+            log("Destroyed Federation");
+        } catch (FederationExecutionDoesNotExist dne) {
+            log("No need to destroy federation, it doesn't exist");
+        } catch (FederatesCurrentlyJoined fcj) {
+            log("Didn't destroy federation, federates still joined");
+        }
     }
 
     private void waitForUser() {
@@ -185,6 +195,10 @@ public class WaitingRoomFederate {
     private void publishAndSubscribe() throws RTIexception {
         InteractionClassHandle openClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicOpened");
         rtiamb.subscribeInteractionClass(openClinicHandle);
+
+        InteractionClassHandle closeClinicHandle = rtiamb.getInteractionClassHandle("HLAinteractionRoot.ClinicClosed");
+        rtiamb.subscribeInteractionClass(closeClinicHandle);
+        fedamb.closeClinic = closeClinicHandle;
 
         InteractionClassHandle patientRegistered = rtiamb.getInteractionClassHandle("HLAinteractionRoot.PatientRegistered");
         ParameterHandle patientId = rtiamb.getParameterHandle(patientRegistered, "PatientId");

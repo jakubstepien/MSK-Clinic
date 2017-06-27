@@ -1,6 +1,15 @@
 package mskClinic.doctors;
 
+import hla.rti1516.*;
 import hla.rti1516e.*;
+import hla.rti1516e.FederateHandleSet;
+import hla.rti1516e.InteractionClassHandle;
+import hla.rti1516e.LogicalTime;
+import hla.rti1516e.ObjectInstanceHandle;
+import hla.rti1516e.OrderType;
+import hla.rti1516e.ParameterHandle;
+import hla.rti1516e.ParameterHandleValueMap;
+import hla.rti1516e.SynchronizationPointFailureReason;
 import hla.rti1516e.encoding.DecoderException;
 import hla.rti1516e.encoding.HLAfloat64BE;
 import hla.rti1516e.encoding.HLAinteger32BE;
@@ -32,6 +41,7 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
     protected double closeTime = -1;
     protected double openTime = -1;
     protected double patientIdInDoctor = -1;
+    protected boolean clinicClosed = false;
 
     protected boolean isRegulating = false;
     protected boolean isConstrained = false;
@@ -48,6 +58,7 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
     protected ParameterHandle patientIdEndVisitHandle;
     protected ParameterHandle closingTimeHandle;
     protected ParameterHandle patientIdInDoctorHandle;
+    protected InteractionClassHandle closeClinic;
     protected Map<Integer,Double> patientsMedicationTimeMap = new HashMap<Integer,Double>();
 
     public DoctorsAmbassador(DoctorsFederate federate) {
@@ -155,6 +166,10 @@ public class DoctorsAmbassador extends NullFederateAmbassador {
             catch (DecoderException e){
                 e.printStackTrace();
             }
+        }
+        if(interactionClass.equals(closeClinic)){
+            clinicClosed = true;
+            log("Recived clinic close");
         }
     }
 
